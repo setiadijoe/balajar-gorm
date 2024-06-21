@@ -1,6 +1,7 @@
 package belajargorm
 
 import (
+	"log"
 	"strconv"
 	"testing"
 
@@ -723,5 +724,21 @@ func TestAssociationClear(t *testing.T) {
 func TestPreloadCondition(t *testing.T) {
 	var user User
 	err := db.Preload("Wallet", "balance > ?", 1000000).Take(&user, "id = ?", "1").Error
+	assert.Nil(t, err)
+}
+
+func TestNestedPreload(t *testing.T) {
+	var wallet Wallet
+	err := db.Preload("User.Addresses").Take(&wallet, "id = ?", 1).Error
+	assert.Nil(t, err)
+
+	log.Println("wallet =====", wallet)
+	log.Println("user =======", wallet.User)
+	log.Println("address ====", wallet.User.Addresses)
+}
+
+func TestPreloadAll(t *testing.T) {
+	var user User
+	err := db.Preload(clause.Associations).Take(&user, "id = ?", "1").Error
 	assert.Nil(t, err)
 }
