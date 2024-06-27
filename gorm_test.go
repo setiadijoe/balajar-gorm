@@ -742,3 +742,33 @@ func TestPreloadAll(t *testing.T) {
 	err := db.Preload(clause.Associations).Take(&user, "id = ?", "1").Error
 	assert.Nil(t, err)
 }
+
+func TestJoinQuery(t *testing.T) {
+	var users []User
+	err := db.Joins("JOIN wallets ON wallets.user_id = users.id").Find(&users).Error
+	assert.Nil(t, err)
+
+	log.Println(len(users))
+
+	users = []User{}
+	err = db.Joins("Wallet").Find(&users).Error
+	assert.Nil(t, err)
+
+	log.Println(len(users))
+}
+
+func TestJoinWithCondition(t *testing.T) {
+	// var users []User
+	// err := db.Joins("JOIN wallets ON wallets.user_id = users.id AND wallets.balance > ?", 1000000).Find(&users).Error
+	// assert.Nil(t, err)
+
+	// log.Println(users)
+	// log.Println(len(users))
+
+	var users = []User{}
+	err := db.Joins("Wallet").Where("Wallet.balance > ?", 1000000).Find(&users).Error
+	assert.Nil(t, err)
+
+	log.Println(users)
+	log.Println(len(users))
+}
