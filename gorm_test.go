@@ -5,6 +5,7 @@ import (
 	"log"
 	"strconv"
 	"testing"
+	"time"
 
 	faker "github.com/brianvoe/gofakeit/v7"
 	"github.com/stretchr/testify/assert"
@@ -22,6 +23,16 @@ func OpenConnection() *gorm.DB {
 	if err != nil {
 		panic(err)
 	}
+
+	sqlDB, err := db.DB()
+	if err != nil {
+		panic(err)
+	}
+
+	sqlDB.SetMaxOpenConns(100)
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetConnMaxLifetime(30 * time.Minute)
+	sqlDB.SetConnMaxIdleTime(5 * time.Minute)
 
 	return db
 }
@@ -832,4 +843,24 @@ func TestScope(t *testing.T) {
 
 	err := db.Scopes(BrokeWallet).Find(&wallets).Error
 	assert.Nil(t, err)
+}
+
+func TestMigrator(t *testing.T) {
+	err := db.Migrator().AutoMigrate(&GuestBook{})
+	assert.Nil(t, err)
+}
+
+func TestHook(t *testing.T) {
+	user := &User{
+		Password: "873hi73y",
+		Name: Name{
+			FirstName: "Faris",
+			LastName:  "Herman",
+		},
+	}
+
+	err := db.Create(user).Error
+	assert.Nil(t, err)
+	assert.NotEqual(t, "", user.ID)
+	log.Print(user.ID)
 }
