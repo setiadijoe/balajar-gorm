@@ -1,6 +1,11 @@
 package belajargorm
 
-import "time"
+import (
+	"fmt"
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type User struct {
 	ID           string    `gorm:"primary_key;column:id"`
@@ -30,4 +35,11 @@ type UserLog struct {
 	Action    string `gorm:"column:action"`
 	CreatedAt int64  `gorm:"column:created_at;autoCreateTime:mili"`
 	UpdatedAt int64  `gorm:"column:updated_at;autoUpdateTime:mili"`
+}
+
+func (u *User) BeforeCreate(db *gorm.DB) error {
+	if u.ID == "" {
+		u.ID = fmt.Sprintf("user-%d", time.Now().UTC().UnixMilli())
+	}
+	return nil
 }
