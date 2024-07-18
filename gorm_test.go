@@ -1,6 +1,7 @@
 package belajargorm
 
 import (
+	"context"
 	"log"
 	"strconv"
 	"testing"
@@ -807,4 +808,28 @@ func TestGroupByHaving(t *testing.T) {
 
 	assert.Nil(t, err)
 	log.Println(result)
+}
+
+func TestContext(t *testing.T) {
+	ctx := context.Background()
+
+	var users []User
+	err := db.WithContext(ctx).Find(&users).Error
+
+	assert.Nil(t, err)
+}
+
+func BrokeWallet(db *gorm.DB) *gorm.DB {
+	return db.Where("balance = ?", 0)
+}
+
+func SultanWallet(db *gorm.DB) *gorm.DB {
+	return db.Where("balance >= ?", 1000000)
+}
+
+func TestScope(t *testing.T) {
+	var wallets []Wallet
+
+	err := db.Scopes(BrokeWallet).Find(&wallets).Error
+	assert.Nil(t, err)
 }
